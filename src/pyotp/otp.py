@@ -31,12 +31,17 @@ class OTP(object):
             self.digest,
         ).digest()
         
-        offset = ord(hmac_hash[19]) & 0xf
+        offset = ord(hmac_hash[-1]) & 0xf
         code = ((ord(hmac_hash[offset]) & 0x7f) << 24 |
             (ord(hmac_hash[offset + 1]) & 0xff) << 16 |
             (ord(hmac_hash[offset + 2]) & 0xff) << 8 |
             (ord(hmac_hash[offset + 3]) & 0xff))
-        return code % 10 ** self.digits
+
+        otp = str(code % (10 ** self.digits))
+        while (len(otp) < self.digits):
+            otp = '0' + otp
+
+        return otp
     
     def byte_secret(self):
         return base64.b32decode(self.secret, casefold=True)
